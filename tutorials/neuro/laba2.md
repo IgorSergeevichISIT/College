@@ -150,3 +150,52 @@ app.window.mainloop()
 - [Keras MNIST пример](https://keras.io/examples/vision/mnist_convnet/)  
 - [Tkinter документация](https://docs.python.org/3/library/tkinter.html)
 
+
+**Если будет ошибка 
+Ошибка `NameError: name 'Image' is not defined` возникает из-за отсутствия импорта класса `Image` из библиотеки Pillow. Вот как это исправить:**
+
+### 1. Добавьте правильный импорт
+В начале файла добавьте:
+```python
+from PIL import Image, ImageOps  # Импорт классов Image и ImageOps
+```
+
+### 2. Проверьте установку Pillow
+Убедитесь, что библиотека Pillow установлена:
+```bash
+pip install Pillow
+```
+
+### 3. Исправленный код для предсказания
+Исправьте метод `predict` в классе `PaintApp`:
+```python
+def predict(self):
+    # Преобразование массива в изображение
+    pil_image = Image.fromarray(self.image * 255)
+    
+    # Инверсия цветов и конвертация в градации серого
+    img = ImageOps.invert(pil_image.convert('L'))
+    
+    # Масштабирование и нормализация
+    img = img.resize((28, 28))
+    img_array = np.array(img) / 255.0
+    
+    # Предсказание
+    prediction = model.predict(img_array.reshape(1, 28, 28, 1))
+    digit = np.argmax(prediction)
+    print(f"Предсказание: {digit}")
+```
+
+### Почему это работает:
+1. **Импорт классов**: `from PIL import Image` делает класс `Image` доступным в коде[1][7][18].
+2. **Обработка изображения**:
+   - `Image.fromarray()` создаёт объект изображения из массива NumPy.
+   - `ImageOps.invert()` инвертирует цвета[3][12][15].
+3. **Совместимость с моделью**: Изображение приводится к формату MNIST (28x28 пикселей, градации серого)[2][5].
+
+### Дополнительные проверки:
+- Убедитесь, что файл `digit_model.h5` существует в директории проекта.
+- Если используется виртуальное окружение, активируйте его перед запуском.
+- Для Linux/Mac: замените обратные слеши `\` в путях на прямые `/`.
+
+
